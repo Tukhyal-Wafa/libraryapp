@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./BookCatalog.css";
 
 const GENRE_COLORS = {
@@ -35,14 +35,16 @@ async function resolveReadLink(book) {
     try {
       const res = await fetch(
         `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`,
-        { signal: AbortSignal.timeout(6000) }
+        { signal: AbortSignal.timeout(6000) },
       );
       if (res.ok) {
         const data = await res.json();
         const entry = data[`ISBN:${cleanIsbn}`];
         if (entry?.ebooks?.length) {
-          if (entry.ebooks[0].read_url)    return { url: entry.ebooks[0].read_url,    type: "read" };
-          if (entry.ebooks[0].preview_url) return { url: entry.ebooks[0].preview_url, type: "preview" };
+          if (entry.ebooks[0].read_url)
+            return { url: entry.ebooks[0].read_url, type: "read" };
+          if (entry.ebooks[0].preview_url)
+            return { url: entry.ebooks[0].preview_url, type: "preview" };
         }
       }
     } catch {}
@@ -53,12 +55,13 @@ async function resolveReadLink(book) {
     try {
       const iaRes = await fetch(
         `https://archive.org/advancedsearch.php?q=isbn:${cleanIsbn}+AND+mediatype:texts&fl[]=identifier&rows=1&output=json`,
-        { signal: AbortSignal.timeout(6000) }
+        { signal: AbortSignal.timeout(6000) },
       );
       if (iaRes.ok) {
         const iaData = await iaRes.json();
         const id = iaData?.response?.docs?.[0]?.identifier;
-        if (id) return { url: `https://archive.org/details/${id}`, type: "archive" };
+        if (id)
+          return { url: `https://archive.org/details/${id}`, type: "archive" };
       }
     } catch {}
   }
@@ -68,12 +71,13 @@ async function resolveReadLink(book) {
     const q = encodeURIComponent(`"${book.title}" "${book.author}"`);
     const iaRes = await fetch(
       `https://archive.org/advancedsearch.php?q=${q}+AND+mediatype:texts&fl[]=identifier&rows=1&output=json`,
-      { signal: AbortSignal.timeout(6000) }
+      { signal: AbortSignal.timeout(6000) },
     );
     if (iaRes.ok) {
       const iaData = await iaRes.json();
       const id = iaData?.response?.docs?.[0]?.identifier;
-      if (id) return { url: `https://archive.org/details/${id}`, type: "archive" };
+      if (id)
+        return { url: `https://archive.org/details/${id}`, type: "archive" };
     }
   } catch {}
 
@@ -94,7 +98,7 @@ async function fetchOLMeta(book) {
   try {
     const res = await fetch(
       `https://openlibrary.org/api/books?bibkeys=ISBN:${cleanIsbn}&format=json&jscmd=data`,
-      { signal: AbortSignal.timeout(6000) }
+      { signal: AbortSignal.timeout(6000) },
     );
     if (res.ok) {
       const data = await res.json();
@@ -108,9 +112,9 @@ async function fetchOLMeta(book) {
 /*  Book Detail Modal                                                          */
 /* ─────────────────────────────────────────────────────────────────────────── */
 function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
-  const [readInfo, setReadInfo]   = useState(null);   // { url, type }
-  const [olData, setOlData]       = useState(null);
-  const [loading, setLoading]     = useState(true);
+  const [readInfo, setReadInfo] = useState(null); // { url, type }
+  const [olData, setOlData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const color = GENRE_COLORS[book.genre] || "#7f8c8d";
   const available = book.available_copies > 0;
 
@@ -118,15 +122,19 @@ function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
     let cancelled = false;
     setLoading(true);
 
-    Promise.all([fetchOLMeta(book), resolveReadLink(book)]).then(([meta, link]) => {
-      if (!cancelled) {
-        setOlData(meta);
-        setReadInfo(link);
-        setLoading(false);
-      }
-    });
+    Promise.all([fetchOLMeta(book), resolveReadLink(book)]).then(
+      ([meta, link]) => {
+        if (!cancelled) {
+          setOlData(meta);
+          setReadInfo(link);
+          setLoading(false);
+        }
+      },
+    );
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [book]);
 
   // Best cover: OL large → OL medium → OL cover CDN by ISBN → placeholder
@@ -134,32 +142,48 @@ function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
   const coverUrl =
     olData?.cover?.large ||
     olData?.cover?.medium ||
-    (cleanIsbn ? `https://covers.openlibrary.org/b/isbn/${cleanIsbn}-L.jpg` : null) ||
+    (cleanIsbn
+      ? `https://covers.openlibrary.org/b/isbn/${cleanIsbn}-L.jpg`
+      : null) ||
     (book.cover?.startsWith("http") ? book.cover : null);
 
-  const description =
-    olData?.description
-      ? typeof olData.description === "string"
-        ? olData.description
-        : olData.description?.value || book.description
-      : book.description || "No description available.";
+  const description = olData?.description
+    ? typeof olData.description === "string"
+      ? olData.description
+      : olData.description?.value || book.description
+    : book.description || "No description available.";
 
-  const readLabel = {
-    read:    "📖 Read Now on Archive.org",
-    preview: "👁️ Preview on Open Library",
-    archive: "📚 Read on Internet Archive",
-    ol:      "🌐 View on Open Library",
-    search:  "🔍 Find on Open Library",
-  }[readInfo?.type] || "🌐 Read / Find Online";
+  const readLabel =
+    {
+      read: "📖 Read Now on Archive.org",
+      preview: "👁️ Preview on Open Library",
+      archive: "📚 Read on Internet Archive",
+      ol: "🌐 View on Open Library",
+      search: "🔍 Find on Open Library",
+    }[readInfo?.type] || "🌐 Read / Find Online";
 
   return (
-    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div
+      className="modal-backdrop"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
       <div className="book-modal">
-        <button className="book-modal-close" onClick={onClose} aria-label="Close">✕</button>
+        <button
+          className="book-modal-close"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ✕
+        </button>
 
         <div className="book-modal-top">
           {/* ── Cover panel ── */}
-          <div className="book-modal-cover-wrap" style={{ background: `linear-gradient(160deg, ${color}18, ${color}38)` }}>
+          <div
+            className="book-modal-cover-wrap"
+            style={{
+              background: `linear-gradient(160deg, ${color}18, ${color}38)`,
+            }}
+          >
             {coverUrl ? (
               <img
                 src={coverUrl}
@@ -171,12 +195,20 @@ function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
                 }}
               />
             ) : null}
-            <div className="book-modal-cover-fallback" style={{ color, display: coverUrl ? "none" : "flex" }}>
+            <div
+              className="book-modal-cover-fallback"
+              style={{ color, display: coverUrl ? "none" : "flex" }}
+            >
               <span className="cover-fallback-icon">📚</span>
               <span className="cover-fallback-title">{book.title}</span>
               <span className="cover-fallback-author">{book.author}</span>
             </div>
-            <span className="book-modal-genre-badge" style={{ background: color }}>{book.genre}</span>
+            <span
+              className="book-modal-genre-badge"
+              style={{ background: color }}
+            >
+              {book.genre}
+            </span>
           </div>
 
           {/* ── Info panel ── */}
@@ -197,7 +229,9 @@ function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
             {olData?.subjects?.length > 0 && (
               <div className="book-modal-subjects">
                 {olData.subjects.slice(0, 6).map((s) => (
-                  <span key={s.name || s} className="subject-tag">{s.name || s}</span>
+                  <span key={s.name || s} className="subject-tag">
+                    {s.name || s}
+                  </span>
                 ))}
               </div>
             )}
@@ -205,14 +239,25 @@ function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
             <div className="book-modal-actions">
               <button
                 className={`borrow-btn modal-borrow ${!available ? "disabled" : ""}`}
-                onClick={() => { if (available) { onBorrow(book); onClose(); } }}
+                onClick={() => {
+                  if (available) {
+                    onBorrow(book);
+                    onClose();
+                  }
+                }}
                 disabled={!available || borrowing === book.id}
               >
-                {borrowing === book.id ? "Borrowing…" : available ? "📖 Borrow Book" : "Not Available"}
+                {borrowing === book.id
+                  ? "Borrowing…"
+                  : available
+                    ? "📖 Borrow Book"
+                    : "Not Available"}
               </button>
 
               {loading ? (
-                <button className="read-btn loading" disabled>Resolving link…</button>
+                <button className="read-btn loading" disabled>
+                  Resolving link…
+                </button>
               ) : (
                 <a
                   href={readInfo?.url}
@@ -227,9 +272,21 @@ function BookDetailModal({ book, onClose, onBorrow, borrowing }) {
 
             <p className="ol-attribution">
               Metadata &amp; links via{" "}
-              <a href="https://openlibrary.org" target="_blank" rel="noopener noreferrer">Open Library</a>
-              {" "}&amp;{" "}
-              <a href="https://archive.org" target="_blank" rel="noopener noreferrer">Internet Archive</a>
+              <a
+                href="https://openlibrary.org"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open Library
+              </a>{" "}
+              &amp;{" "}
+              <a
+                href="https://archive.org"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Internet Archive
+              </a>
             </p>
           </div>
         </div>
@@ -257,7 +314,12 @@ function BookCard({ book, onBorrow, borrowing, onDetails }) {
   return (
     <div className="book-card" onClick={() => onDetails(book)}>
       {/* ── Cover area — full portrait image ── */}
-      <div className="book-cover-area" style={{ background: `linear-gradient(160deg, ${color}18, ${color}40)` }}>
+      <div
+        className="book-cover-area"
+        style={{
+          background: `linear-gradient(160deg, ${color}18, ${color}40)`,
+        }}
+      >
         {coverSrc && !coverFailed ? (
           <>
             {!coverLoaded && (
@@ -279,12 +341,16 @@ function BookCard({ book, onBorrow, borrowing, onDetails }) {
             <span className="cover-ph-title">{book.title}</span>
           </div>
         )}
-        <span className="book-genre-badge" style={{ background: color }}>{book.genre}</span>
+        <span className="book-genre-badge" style={{ background: color }}>
+          {book.genre}
+        </span>
       </div>
 
       {/* ── Info ── */}
       <div className="book-info">
-        <h3 className="book-title" title={book.title}>{book.title}</h3>
+        <h3 className="book-title" title={book.title}>
+          {book.title}
+        </h3>
         <p className="book-author">by {book.author}</p>
         {book.description && <p className="book-desc">{book.description}</p>}
 
@@ -300,7 +366,11 @@ function BookCard({ book, onBorrow, borrowing, onDetails }) {
             onClick={() => available && onBorrow(book)}
             disabled={!available || borrowing === book.id}
           >
-            {borrowing === book.id ? "Borrowing…" : available ? "Borrow" : "Unavailable"}
+            {borrowing === book.id
+              ? "Borrowing…"
+              : available
+                ? "Borrow"
+                : "Unavailable"}
           </button>
           <button className="read-online-btn" onClick={() => onDetails(book)}>
             🌐 Read
@@ -315,13 +385,13 @@ function BookCard({ book, onBorrow, borrowing, onDetails }) {
 /*  BookCatalog                                                                */
 /* ─────────────────────────────────────────────────────────────────────────── */
 function BookCatalog({ token, user, onBorrow }) {
-  const [books, setBooks]         = useState([]);
-  const [genres, setGenres]       = useState([]);
-  const [search, setSearch]       = useState("");
-  const [genre, setGenre]         = useState("All");
-  const [loading, setLoading]     = useState(true);
+  const [books, setBooks] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [search, setSearch] = useState("");
+  const [genre, setGenre] = useState("All");
+  const [loading, setLoading] = useState(true);
   const [borrowing, setBorrowing] = useState(null);
-  const [toast, setToast]         = useState(null);
+  const [toast, setToast] = useState(null);
   const [detailBook, setDetailBook] = useState(null);
 
   const showToast = (msg, type = "success") => {
@@ -336,9 +406,18 @@ function BookCatalog({ token, user, onBorrow }) {
       if (search) params.set("q", search);
       if (genre !== "All") params.set("genre", genre);
       const res = await fetch(`/api/books?${params}`);
-      if (res.ok) setBooks(await res.json());
-    } catch {
-      showToast("Failed to load books.", "error");
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          setBooks(await res.json());
+        } else {
+          showToast("Server returned invalid response.", "error");
+        }
+      } else {
+        showToast("Failed to load books.", "error");
+      }
+    } catch (err) {
+      showToast("Cannot connect to server. Please check your connection.", "error");
     } finally {
       setLoading(false);
     }
@@ -347,11 +426,20 @@ function BookCatalog({ token, user, onBorrow }) {
   const fetchGenres = useCallback(async () => {
     try {
       const res = await fetch("/api/books/meta/genres");
-      if (res.ok) setGenres(await res.json());
-    } catch {}
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          setGenres(await res.json());
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch genres:", err);
+    }
   }, []);
 
-  useEffect(() => { fetchGenres(); }, [fetchGenres]);
+  useEffect(() => {
+    fetchGenres();
+  }, [fetchGenres]);
   useEffect(() => {
     const t = setTimeout(fetchBooks, 300);
     return () => clearTimeout(t);
@@ -364,6 +452,13 @@ function BookCatalog({ token, user, onBorrow }) {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        showToast("Server error. Please try again.", "error");
+        return;
+      }
+      
       const data = await res.json();
       if (res.ok) {
         showToast(`"${book.title}" borrowed! Due: ${data.borrow?.due_date}`);
@@ -372,8 +467,8 @@ function BookCatalog({ token, user, onBorrow }) {
       } else {
         showToast(data.msg || "Failed to borrow.", "error");
       }
-    } catch {
-      showToast("Network error.", "error");
+    } catch (err) {
+      showToast("Cannot connect to server.", "error");
     } finally {
       setBorrowing(null);
     }
@@ -396,7 +491,8 @@ function BookCatalog({ token, user, onBorrow }) {
         <div>
           <h1 className="page-title">Book Catalog</h1>
           <p className="page-sub">
-            {books.length} book{books.length !== 1 ? "s" : ""} — click any card to read online
+            {books.length} book{books.length !== 1 ? "s" : ""} — click any card
+            to read online
           </p>
         </div>
       </div>
@@ -411,7 +507,11 @@ function BookCatalog({ token, user, onBorrow }) {
             onChange={(e) => setSearch(e.target.value)}
             className="search-input"
           />
-          {search && <button className="clear-btn" onClick={() => setSearch("")}>✕</button>}
+          {search && (
+            <button className="clear-btn" onClick={() => setSearch("")}>
+              ✕
+            </button>
+          )}
         </div>
 
         <div className="genre-filters">
@@ -425,7 +525,15 @@ function BookCatalog({ token, user, onBorrow }) {
             <button
               key={g}
               className={`genre-chip ${genre === g ? "active" : ""}`}
-              style={genre === g ? { background: GENRE_COLORS[g] || "#555", borderColor: GENRE_COLORS[g] || "#555", color: "#fff" } : {}}
+              style={
+                genre === g
+                  ? {
+                      background: GENRE_COLORS[g] || "#555",
+                      borderColor: GENRE_COLORS[g] || "#555",
+                      color: "#fff",
+                    }
+                  : {}
+              }
               onClick={() => setGenre(g)}
             >
               {g}
@@ -436,7 +544,9 @@ function BookCatalog({ token, user, onBorrow }) {
 
       {loading ? (
         <div className="loading-grid">
-          {[...Array(6)].map((_, i) => <div key={i} className="book-card skeleton" />)}
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="book-card skeleton" />
+          ))}
         </div>
       ) : books.length === 0 ? (
         <div className="empty-state">

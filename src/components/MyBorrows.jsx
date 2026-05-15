@@ -19,9 +19,18 @@ function MyBorrows({ token, onReturn }) {
       const res = await fetch("/api/borrows/my", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) setBorrows(await res.json());
-    } catch {
-      showToast("Failed to load borrows.", "error");
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          setBorrows(await res.json());
+        } else {
+          showToast("Server returned invalid response.", "error");
+        }
+      } else {
+        showToast("Failed to load borrows.", "error");
+      }
+    } catch (err) {
+      showToast("Cannot connect to server.", "error");
     } finally {
       setLoading(false);
     }
@@ -38,6 +47,13 @@ function MyBorrows({ token, onReturn }) {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        showToast("Server error. Please try again.", "error");
+        return;
+      }
+      
       const data = await res.json();
       if (res.ok) {
         showToast(`"${borrow.title}" returned successfully!`);
@@ -46,8 +62,8 @@ function MyBorrows({ token, onReturn }) {
       } else {
         showToast(data.msg || "Failed to return.", "error");
       }
-    } catch {
-      showToast("Network error.", "error");
+    } catch (err) {
+      showToast("Cannot connect to server.", "error");
     } finally {
       setReturning(null);
     }

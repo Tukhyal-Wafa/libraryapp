@@ -16,8 +16,15 @@ function Dashboard({ authData, onLogout }) {
       const res = await fetch("/api/borrows/stats", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.ok) setStats(await res.json());
-    } catch {}
+      if (res.ok) {
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          setStats(await res.json());
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch stats:", err);
+    }
   }, [token, user.role]);
 
   useEffect(() => {

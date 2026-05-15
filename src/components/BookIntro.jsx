@@ -50,11 +50,25 @@ function BookIntro({ onEnter }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+      
+      // Check if response is JSON before parsing
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error. Please ensure the backend is running.");
+      }
+      
       const data = await res.json();
       if (!res.ok) throw new Error(data.msg || "Request failed");
       return data;
     } catch (err) {
-      setError(err.message);
+      // Handle network errors and JSON parse errors
+      if (err.name === "TypeError" && err.message.includes("fetch")) {
+        setError("Cannot connect to server. Please check if the backend is running.");
+      } else if (err instanceof SyntaxError) {
+        setError("Server returned invalid response. Please try again.");
+      } else {
+        setError(err.message);
+      }
       return null;
     } finally {
       setLoading(false);
