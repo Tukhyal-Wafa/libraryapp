@@ -1,0 +1,232 @@
+/* ── Root ─────────────────────────────────────────────────────────────────── */
+.charts-root {
+  position: relative;
+}
+
+.charts-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-refresh {
+  padding: 9px 18px;
+  background: #fff;
+  border: 1.5px solid rgba(8, 103, 136, 0.22);
+  border-radius: 10px;
+  color: #086788;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-refresh:hover {
+  background: rgba(7, 160, 195, 0.08);
+  border-color: #07A0C3;
+  color: #07A0C3;
+}
+
+/* ── Summary row ──────────────────────────────────────────────────────────── */
+.summary-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 110px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 12px rgba(8, 103, 136, 0.1);
+  border: 1px solid rgba(8, 103, 136, 0.07);
+  border-top: 3px solid #F0C808;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(8, 103, 136, 0.16);
+}
+
+.sum-icon { font-size: 1.6rem; }
+
+.sum-val {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #054e68;
+  line-height: 1;
+}
+
+.sum-lbl {
+  font-size: 0.72rem;
+  color: #07A0C3;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+/* ── Charts grid ──────────────────────────────────────────────────────────── */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(8, 103, 136, 0.08);
+  border: 1px solid rgba(8, 103, 136, 0.07);
+  overflow: hidden;
+}
+
+.chart-card.wide {
+  grid-column: 1 / -1;
+}
+
+/* ── Chart internals ──────────────────────────────────────────────────────── */
+.chart-wrap {
+  width: 100%;
+}
+
+.chart-title {
+  font-family: 'Georgia', serif;
+  font-size: 1rem;
+  color: #086788;
+  margin: 0 0 14px;
+  font-weight: 700;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.chart-empty {
+  padding: 40px;
+  text-align: center;
+  color: #7ab8cc;
+  font-size: 0.9rem;
+}
+
+/* ── Pie chart ────────────────────────────────────────────────────────────── */
+.pie-layout {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pie-svg {
+  width: 240px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.pie-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.82rem;
+}
+
+.legend-item:hover,
+.legend-item.hovered {
+  background: rgba(7, 160, 195, 0.07);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  flex: 1;
+  color: #086788;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legend-val {
+  font-weight: 700;
+  color: #054e68;
+}
+
+.legend-pct {
+  color: #7ab8cc;
+  font-size: 0.75rem;
+}
+
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
+.charts-skeleton {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-skeleton-box {
+  height: 280px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, #fae8c0 25%, #f5e4b0 50%, #fae8c0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Page title ───────────────────────────────────────────────────────────── */
+.page-title {
+  font-family: 'Georgia', serif;
+  font-size: 2rem;
+  color: #054e68;
+  margin: 0 0 4px;
+}
+
+.page-sub {
+  color: #07A0C3;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .chart-card.wide { grid-column: 1; }
+  .charts-skeleton { grid-template-columns: 1fr; }
+  .summary-row { gap: 10px; }
+  .summary-card { min-width: 80px; padding: 14px 10px; }
+  .pie-layout { flex-direction: column; }
+  .pie-svg { width: 200px; }
+}
