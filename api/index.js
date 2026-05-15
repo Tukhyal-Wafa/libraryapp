@@ -23,11 +23,11 @@ app.use((req, res, next) => {
 // Health check
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
-// Routes
-app.use("/api/auth", require("../server/routes/auth"));
-app.use("/api/books", require("../server/routes/books"));
-app.use("/api/borrows", require("../server/routes/borrows"));
-app.use("/api/users", require("../server/routes/users"));
+// Routes - Use Vercel-compatible routes
+app.use("/api/auth", require("../server/routes/auth-vercel"));
+app.use("/api/books", require("../server/routes/books-vercel"));
+app.use("/api/borrows", require("../server/routes/borrows-vercel"));
+app.use("/api/users", require("../server/routes/users-vercel"));
 
 // 404 handler for API routes
 app.use((req, res, next) => {
